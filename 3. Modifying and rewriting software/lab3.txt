@@ -1,0 +1,50 @@
+1)
+I want to first grab the Coreutils 8.29 source code compressed tarball
+So I perform wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz
+
+Then I do the same for the signature and GNU keyring
+wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-8.29.tar.xz.sig
+wget https://ftp.gnu.org/gnu/gnu-keyring.gpg
+
+Then I run the shell command provided
+gpg --verify --keyring ./gnu-keyring.gpg coreutils-8.29.tar.xz.sig
+No problems encountered during verification.
+
+2)
+I first used command tar –xzvf coreutils-8.29.tar.xz, didn't get the files.
+I used man tar, and changed the command to tar –xJvf coreutils-8.29.tar.xz
+Then I made a directory called coreutilsInstall - mkdir coreutilsInstall
+Go to the coreutils-8.29 file cd coreutils-8.29
+Use the following command to ensure autoreconf is installed autoreconf -f -i
+Use Configure and the make and make install to install files to directory
+./configure --prefix =/u/cs/ugrad/jeung/lab3/coreutilsInstall
+make
+make install
+There are now directories in coreutilsInstall
+
+3) I now want to reproduce the bug on my machine. I go to the directory
+cd coreutilsInstall/bin and produce the bug calling the command ls -a -A
+
+4) Now I want to apply the patch.
+Go to directory, cd coreutilsInstall then I create a file called patch_file.
+I paste the patch content from Bug#30963 Message #10 there.
+emacs patch_file.
+I first tried patch -p0 < patch_file and I noticed it did not work. So I tried
+patch -p1 < patch_file and it worked, so it must've removed the first sequence.
+
+5) Now I'm going to build the fixed version.
+I call the command make.
+There are fewer files displayed on this round of calling the command.
+
+6)I check the unmatched version by calling ls command.
+  cd coreutilsInstall/bin
+  ./ls -a -A
+  Then I go to the patched directory and call the same command.
+  cd coreutils-8.29/src
+  ./ls -a -A
+. and .. are dont exist in the patched directory, but does in coreutilsInstall.
+
+
+
+
+

@@ -1,0 +1,42 @@
+Q1) The patch made the performance of ls worse.
+ I used command : time ./ls -a -A for the patched version and unpatched.
+ There was a noticeable difference in speed when I checked.
+
+Q2) Well since ls -aA' is now equivalent to 'ls -A since -A now overrides -a.
+If you thought that -a still overrides the other option you'd be mistaken.
+That is something that was default so it could confuse workers.
+All files will still output and no major issues should arise.
+
+Q3) When we run the script on an empty file like /dev/null
+Using command : python2 randline.py /dev/null -n 3
+I get the following output:
+
+Traceback (most recent call last):
+  File "randline.py", line 70, in <module>
+    main()
+  File "randline.py", line 64, in main
+    sys.stdout.write(generator.chooseline())
+  File "randline.py", line 34, in chooseline
+    return random.choice(self.lines)
+  File "/usr/lib64/python2.7/random.py", line 274, in choice
+    return seq[int(self.random() * len(seq))]
+     # raises IndexError if seq is empty
+IndexError: list index out of range
+
+Which makes sense because if the file is empty and the -n command
+outputs random lines from the file, we should have an error.
+
+Q4) When I run the script with python3 using command :
+ python3 randline.py /dev/null -n 3
+I get the error:
+ File "randline.py", line 65
+    except IOError as (errno, strerror):
+                      ^
+SyntaxError: invalid syntax
+
+This means that some of syntax in the randline.py file has been
+deprecated in Python3.
+It points to line 65, I looked up some documentation and
+ noticed in Python2 that the tuple argument worked but not Python3.
+I suspect unpacking tuples for the exceptions might be the difference.
+

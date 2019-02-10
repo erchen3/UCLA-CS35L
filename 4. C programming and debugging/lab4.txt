@@ -1,0 +1,131 @@
+I first get the coreutils by calling 
+wget https://web.cs.ucla.edu/classes/winter19/cs35L/assign/coreutils-with-bug.tar.gz
+
+Then I want to untar it and decompress to directory
+tar -xzvf coreutils-with-bug.tar.gz
+
+Look in the directory and configure
+cd coreutils-with-bug.tar.gz
+./configure
+
+Then I build it 
+make
+
+I got an output of 
+In file included from utimecmp.c:41:0:
+utimens.h:2:5: error: conflicting types for 'futimens'
+ int futimens (int, char const *, struct timespec const [2]);
+     ^
+In file included from utimecmp.h:25:0,
+                 from utimecmp.c:25:
+/usr/include/sys/stat.h:373:12: note: previous declaration of 'futimens' was here
+ extern int futimens (int __fd, const struct timespec __times[2]) __THROW;
+            ^
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory `/w/home.23/cs/ugrad/jeung/lab4/coreutils-with-bug/lib'
+make[2]: *** [all] Error 2
+make[2]: Leaving directory `/w/home.23/cs/ugrad/jeung/lab4/coreutils-with-bug/lib'
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory `/w/home.23/cs/ugrad/jeung/lab4/coreutils-with-bug'
+make: *** [all] Error 2
+
+So I then get the patch
+wget https://web.cs.ucla.edu/classes/winter19/cs35L/assign/coreutils.diff
+
+I then Apply the patch 
+patch -p0 < coreutils.diff
+ 
+then I build it
+
+make 
+make install
+
+This time there was no error message that displayed
+Like the previous time. It had an issue with the function
+Futimens. Since it was renamed, the program was able to run and
+Fixed the files.
+
+Now I'm going to reproduce the bug ls -lt. 
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ ~/lab4/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now now1
+-rw-r--r-- 1 jeung csugrad 0 1918-11-11 03:00:00.000000000 -0800 wwi-armistice
+-rw-r--r-- 1 jeung csugrad 0 2019-02-08 19:05:27.371736564 -0800 now1
+-rw-r--r-- 1 jeung csugrad 0 2019-02-08 19:05:24.293651926 -0800 now
+
+
+
+After the error I use the debugger.
+gdb ~/lab4/coreutils-with-bug/src/ls
+
+Since wwi-armistice should not display first, but last I inferred that theres a problem that doesn't compare/sort modification dates properly. So I search for a function similar.
+I want to see what functions exists
+Gdb info functions 
+
+I see theres a compare_mtime function that is a good lead to check out so I set a breakpoint at the function.
+Gdb break_compare_mtime
+Gdbb run -lt
+
+I step through the function calling
+gdb s
+
+After a couple times I keep seeing timespec_cmp appear
+And found it in
+cd ~/lab4/coreutils-with-bug/lib
+emacs timespec.h
+
+timespec_cmp (struct timespec a, struct timespec b) 
+{
+ int diff = a.tv_sec - b.tv_sec;
+  return diff ? diff : a.tv_nsec - b.tv_nsec;
+}
+
+I notice that the function might have a fault with integer overflow.
+This may occur if the difference between the two (a.tv_sec -b.tv_sec) is significant enough.
+Leading to wrong dates outputted as if it were in the further in the future but shouldn't be the case.
+
+I then proceed to create the diff of the timespec function in the form of a ChangeLog entry
+But copy it first, editing it so that we explicitly do what the function was intended to do. ->/* Return negative, zero, positive if A < B, A == B, A > B, respectively.       
+   Assume the nanosecond components are in range, or close to it.  */
+
+cp timespec.h goodspec.h
+emacs goodspec.h
+
+Modify it to have the function do this
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  if (a.tv_sec < b.tv_sec) return -1;
+  else if (b.tv_sec < a.tv_sec) return 1;
+  return 0;
+}
+
+ Create the patch file and is the changelog Entry
+diff -u timespec.h goodspec.h > lab4.diff
+
+Patch file
+patch -p0 <lab4.diff
+
+Then I want to build to complete the fix.
+Make
+
+Running the commands on my home directory on SEASnet 
+ tmp=$(mktemp -d)
+ cd $tmp
+ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+ touch now
+ sleep 1
+ touch now1
+ TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+-rw-r--r-- 1 jeung csugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 jeung csugrad 0 2019-02-09 06:08:53.313887000 +0000 now1
+-rw-r--r-- 1 jeung csugrad 0 2019-02-09 06:08:50.285612000 +0000 now
+
+I noticed that SEASnet does not have the correct output when I use the pre-installed touch and ls commands.
+The year is changed to 2054. I assume this is because of the overflow error previously mentioned. Also, I presume it has
+something to do with how the bits are represented on SEASnet system and Linux system.
+

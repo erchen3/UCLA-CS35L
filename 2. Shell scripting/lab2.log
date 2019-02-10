@@ -1,0 +1,126 @@
+I first checked the locale by typing locale and noticed LC_CTYPE="UTF-8"
+so I enter export LC_ALL='C'
+now the output as desired is  LC_CTYPE="C"
+
+Next thing I do is I want to create a file by sorting the contents of the file
+/usr/share/dict/words and putting the result into a file named works in my working directory.
+
+sort /usr/share/dict/words > words
+
+This creates a sorted list of English words in my working directory.
+
+Then I create a text file containing the HTML in assignment 2's web page using
+wget https://web.cs.ucla.edu/classes/winter19/cs35L/assign/assign2.html
+
+tr -c 'A-Za-z' '[\n*]'
+
+This command takes this html file and replaces characters in the complement of SET1 with characters in SET2 which is [\n*]
+
+tr -cs 'A-Za-z' '[\n*]'
+
+This command replaces a sequence of repeated characters in the complement SET1 and replaces them with characters in SET2. So sequences of repeated cha\
+racters in the complement of 'A-za-z' get replaced with a new line.
+
+tr -cs 'A-Za-z' '[\n*]' | sort
+
+This command does exactly the same thing as above replacing sequences of repeated characters in the complement of 'A-za-z' get replaced with a new lin\
+e, but the result of tr gets sent to stdin for sort and sorts its alphabetically  because of the pipeline.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+
+This command replaces sequences of repeated characters in the complement of 'A-za-z' with a new line, but the result of tr gets sent to stdin for sort\
+ and sorts  it alphabetically. With the -u, outputs only the first of an equal run. Basically wont have duplicates in output.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+
+This command takes the output from the sort command as input FILE1 for comm and words for FILE2 as it prints out lines unique to FILE1 in the first co\
+lumn, lines unique to lines in column 2, and lines that appear in both files in column 3.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+
+This command takes the output from the sort command as input FILE1 for comm and words for FILE2. It supresses column 2 and column 3. Meaning it only d\
+isplays the column that has lines unique to FILE1.
+
+I use wget http://mauimapp.com/moolelo/hwnwdseng.htm to store these Hawaiian translated words within a file.
+
+Then I want to access all the words from the HTML file I'm asked to target. First, I want to get the argument passed in and cat it so I can pipe it to the the next line.
+cat $1
+
+Second step is handling of the characters inside the td tags.
+grep -E '<td>.+</td>'
+
+Then I want to remove the tags
+sed 's/<[^>]*>//g'
+
+Then I want to remove all the English lines but they are the odd instances
+sed –n ‘1~2!p’
+
+Then I want to delete all extra empty lines
+$ sed '/^$/d’
+
+Then I need to change upper casing to lower casing
+tr '[:upper:]' '[:lower:]'
+
+Then I need to convert backticks to apostrophes
+tr '`' "'"
+
+Then I need to handle entries with spaces or commas and seperate as multiple words
+sed 's/, /\n/g'
+sed 's/ /\n/g'
+
+Then I need to remove words that dont have characters that are Hawaiian
+sed "s/.*[^pk'mnwlhaeiou].*//"
+
+Sort the words and ensure no duplicates
+sort -u
+
+Then I want to remove first line of file
+sed '1d'
+
+Then I run this all, creating the build words file and insert the commands.
+Make it executable chmod +x buildwords
+
+Create the Hawaiian dictionary with
+cat hwnwdseng.htm | ./buildwords > hwords
+
+Then I check my work by running the English spell checker on the web page
+
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]'
+| sort -u | comm -23 - words > miss
+
+I find 42 misspelled English  words.
+wc -w missed
+
+Now I check the website as I use the Hawaiian spell checker, on the web page,
+cat assign2.html | tr -cs 'A-Za-z' '[\n*]' | tr '[:upper:]' '[:lower:]'
+| sort -u | comm -23 - hwords > missDos
+
+
+I find 489 mispelled Hawaiian words.
+wc - w missDos
+
+I want to find words that are misspelled as English but not as Hawaiian.
+cat miss | tr -cs "pk\'mnwlhaeiou" '[\n*]' |
+     sort -u | comm -12 - hwords
+
+I get  about 6.
+e
+halau
+i
+lau
+po
+wiki
+
+
+I want to find words that are misspelled as Hawaiian, but not as English.
+
+cat missDos | tr -cs 'A-Za-z' '[\n*]' |
+     sort -u | comm -12 - words
+
+There are a bunch of words misspelled as Hawaiian but not as English.
+Such as where, write, worry, and various.
+
+
+
+
+

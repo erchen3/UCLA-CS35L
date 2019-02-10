@@ -1,0 +1,32 @@
+#!/bin/bash                                                                                                                                                 
+                                                                                                                                                             
+
+arguments=("$@")
+
+
+
+for argument in "${arguments[@]}" #goes through all arguments                                                                                                
+do
+    if [[ -f $argument ]]; then
+        if LC_ALL=C grep -q '[ -~]' $argument; then #checks if valid                                                                                         
+            if LC_ALL=C grep -q '[^ -~]' $argument; then #if utf print files out                                                                             
+                echo $argument
+            else # not utf, do nothing                                                                                                                       
+               continue
+            fi
+        fi
+    elif [[ -d $argument ]]; then
+        for file in $argument/*
+        do
+            if LC_ALL=C grep -rlPq '[ -~]' $file; then #checks if ascii and do nothing                                                                       
+                continue
+            else # not ascii so it's  utf8                                                                                                                   
+                    grep -rlP '[^ -~]' $argument #prints out all the utf-8 files and will look through subdirectories recursively                                                                                                                                                                                     
+            fi
+            break;
+        done
+
+    else
+        echo "weird stuff"
+    fi
+done
