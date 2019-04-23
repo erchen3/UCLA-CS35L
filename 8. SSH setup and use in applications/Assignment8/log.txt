@@ -1,0 +1,88 @@
+The first step I did was set up my beagle bone by referring
+To the instructions on piazza.
+
+I connected it to my computer,
+Double clicked on START.htm file and follow the instructions
+To download the appropriate driver.
+
+Afterwards I ran the following command
+
+sudo ssh root@192.168.7.2
+
+And first entered my computer's password,
+Then I logged into my beagle bone
+
+After successfully SSH into my beagle bone,
+I  call
+
+sudo connmanctl
+
+Enable wifi
+
+Scan wifi
+
+Services
+
+Agent on
+
+Then I just connect to the UCLA_WEB wifi
+And quit the process.
+
+Afterwards, I updated the databases and installed xauth & xvfb
+
+sudo apt-get update
+sudo apt-get install xauth
+sudo apt-get install xvfb
+
+Then I also make sure the environment is set up properly
+by checking if openssh is there by calling 
+
+dpkg --get-selections | grep openssh
+
+Then I make sure X11 forwarding is enabled
+And also make sure forwardAgent has yes.
+/etc/ssh/ssh_config
+/etc/ssh/sshd_config 
+~/.ssh/config 
+
+Afterwards I downloaded the X11 client on my computer and 
+Firefox on beagle bone
+
+sudo apt-get install firefox-esr-l10n-en-gb
+
+-------------
+For the Laboratory, my partner was Sriram Sonti and I acted as the Server.
+
+I set up the public and private keys first by calling
+
+ssh-keygen
+
+
+Then I create an account for the client on the server
+
+sudo useradd –d /home/erica –m Eric
+ 
+sudo passwd 1234
+
+Then I create the .ssh directory
+
+cd /home/erica
+sudo mkdir .ssh
+
+Then I update the permissions 
+
+ sudo chown –R Eric .ssh
+
+ sudo chmod 700 .ssh
+
+After this step, I provided my partner Sriram
+With my username and server IP address by calling
+Ifconfig and checking the IP address under wlan0.
+
+After I provide this, Sriram executes the steps for
+The Client and he's successfully able to ssh into my beaglebone
+And ran firefox on it.
+
+
+
+

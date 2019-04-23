@@ -1,0 +1,118 @@
+Eric Chen
+305099495
+CS35L Lab Section 1
+
+1)
+I create the file hw9.txt.
+Commands:
+	emacs hw9.txt
+
+2)
+ I check out Version 3.0 of diffutils from my repo into
+A branch named quote
+
+Commands:
+	git checkout v3.0 -b quote
+
+3) 
+Then I want to install my changes into this new branch
+
+Commands:
+	 patch -p1 < ../quotepatch.txt
+
+The patch works 
+
+[jeung@lnxsrv09 ~/HW9/hw/diffutils]$ patch -p1 < ../quotepatch.txt
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+4) 
+I read up on the link about
+Add-change-log-entry-other window
+
+5)
+ Then I create a changeLog entry for my patch and added the following
+To my log.
+
+Commands:
+	emacs
+	(C-x 4 a)
+
+2019-03-12  Eric Jeung Chen  <jeung@lnxsrv02.seas.ucla.edu>
+
+        * cmp.c  Changed Grave Accent to the apostrophe to character string constants
+
+        * diff.c Changed Grave Accent to the apostrophe to character string constants
+
+        * diff3.c Changed Grave Accent to the apostrophe to character string constants
+
+        * dir.c Changed Grave Accent to the apostrophe to character string constants
+
+        * sdiff.c Changed Grave Accent to the apostrophe to character string constants
+
+        * util.c Changed Grave Accent to the apostrophe to character string constants
+
+6) 
+Now I commit my changes to the new branch using Change log entry as the commit message
+I first want to add them all to the staging area and then commit.
+
+Commands:
+	git add .
+	git commit -F ChangeLog
+
+7) 
+Now I use the command "git format-patch" to generate a file
+That is a formatted patch for my partner later.
+
+Command:
+   git format-patch -1 --stdout > formatted-patch.txt
+
+
+8)
+ My partner Stephanie Phuong Khanh Doan is and will verify our patches work.
+I first make a new temporary branch. Then what I will do is get my partners formatted-patch.txt File and send mines as well so that we can work on it in the
+Branch just created.
+
+Commands:
+git checkout v3.0 -b partner
+git am stephanie-patch.txt
+
+
+Now I check that it works by rebuilding:
+
+Commands:
+	./bootstrap
+	./configure
+	Make
+	Make check
+9)
+Now I verify the ChangeLog entry works
+
+Commands:
+	 make distdir
+
+And then I examine the ChangeLog in the folder diffutils-3.0.1-271e
+That was created and see her ChangeLog there.
+
+Commands:
+	cd diffutils-3.0.1-271e
+	emacs ChangeLog
+
+10)
+Then I need to exit the server first and re ssh but with X11 enabled.
+Afterwards, I want to go to the directory ~eggert/src/gnu/emacs and run gitk
+To find the newest merge not newer than 2015-01-25.
+
+Commands:
+	ssh -X jeung@lnxsrv09.seas.ucla.edu
+	cd ~eggert/src/gnu/emacs
+	gitk
+
+When I call gitk a browser shows up and I can see the logo changes.
+
+
+

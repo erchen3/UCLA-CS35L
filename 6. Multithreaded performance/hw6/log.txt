@@ -1,0 +1,61 @@
+My first step is to make sure I'm using
+ a new enough version of sort.It is version 8.22.
+After calling sort --version
+
+The next objective is to make a file
+Containing 2^(24) random single precision floating
+Point numbers, in textual form, one per line with no white
+space.
+
+I first write the contents of an input file(/dev/urandom) 
+to file.txt in a user-specified format that is with floats, 
+and a size That is the number of bytes of  2^(24) 
+floats -> 4 times that value 
+
+od -tf -An -N $((4*(2**24))) < /dev/urandom > file.txt
+
+Then I check out whats in the file
+cat file.txt
+
+I see thatI still need it to be one 
+per line with no white spaces.
+
+od -f -An -N $((4*(2**24))) < /dev/urandom | tr -s ' ' '\n'| sed '/^$/d'  > file.txt
+
+Making sure I get the right number for the test file
+wc -l file.txt
+
+I get below which is right
+16777216 file.txt 
+
+Now I time sort -g and send its output to /dev/null
+I call
+time -p sort -g file.txt > /dev/null
+I get
+real 36.65
+user 199.80
+sys 1.14
+
+time -p sort -g --parallel=1  file.txt > /dev/null
+real 179.11
+user 178.77
+sys 0.33
+
+time -p sort -g --parallel=2  file.txt > /dev/null
+real 96.03
+user 182.39
+sys 0.66
+
+time -p sort -g --parallel=4  file.txt > /dev/null
+real 58.35
+user 194.25
+sys 0.97
+
+time -p sort -g --parallel=8  file.txt > /dev/null
+real 37.07
+user 200.02
+sys 1.10
+
+
+The general sort -g has about the same time for execution when parallel = 8. For lower values, they took much longer than general sort -g. As a result, I 
+Suspect general sort -g is optimized and might have multithreading already.

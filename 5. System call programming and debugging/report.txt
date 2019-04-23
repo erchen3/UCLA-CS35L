@@ -1,0 +1,282 @@
+I first want to make the program tr2b.c so I open emacs
+And generate the program
+I check for the proper amount of
+ arguments(tr from to) ->3
+Then I grab the arguments to from & to,
+And I enforce the fact that they 
+must be same length
+Then I make sure from doesn't have 
+duplicate bytes
+Then I iterate until end of file so
+ that I can go 
+Through all input and if a character 
+exists in from
+Matching c, then write to. Otherwise set a flag value
+To 0 and it'll go through the loop 
+staying like that and then we'll
+Write c to output. 
+
+
+Then I want to write tr2u.c so I first copy tr2b.c to
+tr2u.c
+Then since Im still enforcing the same rules, 
+My checks remain the same. 
+I read how read and write work and I learn
+What open file descriptors are.
+Since the program is the same, I retain the logic
+And changed getchar and putchar with read and write.
+
+3) I first learn whats trace does, man strace
+And Need to compare system calls issued from both
+Programs.
+a) when copying 1 file to another 
+B) when copying a file to terminal
+
+Using file w/ at least 5,000,000 bytes I call
+head --bytes=5000000 /dev/urandom > bigboi.txt
+
+Testing copying 1 file to another 
+I call
+strace -c ./tr2b 'CB' 'XY' < bigboi.txt > tr2bOut.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 28.00    0.000056           6         9           mmap
+ 18.50    0.000037           9         4           mprotect
+ 15.50    0.000031           8         4           fstat
+ 10.50    0.000021          11         2           read
+  9.00    0.000018          18         1           write
+  7.00    0.000014          14         1           munmap
+  5.00    0.000010           5         2           open
+  4.50    0.000009           5         2           close
+  2.00    0.000004           4         1           arch_prctl
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000200                    29         1 total
+
+Now for tr2u
+strace -c ./tr2u 'CB' 'XY' < bigboi.txt > tr2uOut.txt
+
+It took forever so I ended it after a Long time.
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.15   10.810323           5   2091126           write
+ 44.85    8.789901           4   2091127           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00   19.600224               4182275         1 total
+
+
+tr2u makes far more system calls after comparison.
+
+
+----------
+Now I test copying to terminal
+
+For tr2b:
+strace -c ./tr2b 'CB' 'XY' < bigboi.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  0.00    0.000000           0         2           read
+  0.00    0.000000           0         3           write
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0         9           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000000                    31         1 total
+
+
+For tr2u: 
+strace -c ./tr2u 'CB' 'XY' < bigboi.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 55.39    4.468693           4   1043763           write
+ 44.61    3.599006           3   1043765           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         7           mmap
+  0.00    0.000000           0         4           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    8.067699               2087550         1 total
+
+
+4)
+When comparing time
+time strace -c ./tr2b 'CB' 'XY' < bigboi.txt
+
+real	0m0.005s
+user	0m0.000s
+sys	0m0.004s
+
+time strace -c ./tr2u 'CB' 'XY' < bigboi.txt
+
+real	0m48.580s
+user	0m7.219s
+sys	0m31.402s
+
+
+It's clear that unbuffered takes immensely longer than buffered I/O.
+
+
+---------------------
+I will measure any differences in performance 
+between sfrob and sfrobu using the time commands
+
+
+
+I create a file(file.txt) , with 5 lines of Hello World
+------------------------------
+Running time ./sfrob < file.txt
+
+
+real	0m0.002s
+user	0m0.001s
+sys	0m0.000s
+
+Running time ./sfrobu <file.txt
+real	0m0.003s
+user	0m0.000s
+sys	0m0.002s
+
+Running time ./sfrobu -f <file.txt
+
+real	0m0.002s
+user	0m0.001s
+sys	0m0.000s
+
+Running time ./sfrobs -f <file.txt
+
+real	0m0.005s
+user	0m0.004s
+sys	0m0.004s
+Running time ./sfrobs -f <file.txt
+real	0m0.006s
+user	0m0.003s
+sys	0m0.005s
+
+
+Then with 200 lines of Hello World
+-------------------------
+
+Running time ./sfrob <file.txt
+real	0m0.003s
+user	0m0.000s
+sys	0m0.002s
+
+Running time ./sfrobu <file.txt
+real	0m0.010s
+user	0m0.002s
+sys	0m0.008s
+
+
+Running time ./sfrobu -f <file.txt
+real	0m0.005s
+user	0m0.001s
+sys	0m0.003s
+
+Running time ./sfrobs  <file.txt
+real	0m0.006s
+user	0m0.002s
+sys	0m0.005s
+
+Running time ./sfrobs -f <file.txt
+real	0m0.007s
+user	0m0.002s
+sys	0m0.006s
+
+With 800 Hello Worlds
+-----------------
+Running time ./sfrob <file.txt
+
+real	0m0.005s
+user	0m0.002s
+sys	0m0.002s
+
+Running time ./sfrobu <file.txt
+real	0m0.036s
+user	0m0.003s
+sys	0m0.032s
+
+Running time ./sfrobu -f <file.txt
+real	0m0.016s
+user	0m0.002s
+sys	0m0.013s
+
+Running time ./sfrobs  <file.txt
+real	0m0.009s
+user	0m0.003s
+sys	0m0.006s
+
+Running time ./sfrobs -f <file.txt
+
+real	0m0.006s
+user	0m0.003s
+sys	0m0.005s
+
+With 1600 Hello Worlds
+----------------
+Running time ./sfrob <file.txt
+real	0m0.007s
+user	0m0.003s
+sys	0m0.003s
+
+Running time ./sfrobu <file.txt
+real	0m0.029s
+user	0m0.004s
+sys	0m0.023s
+
+Running time ./sfrobu -f <file.txt
+
+real	0m0.030s
+user	0m0.006s
+sys	0m0.023s
+
+Running time ./sfrobs  <file.txt
+real	0m0.007s
+user	0m0.003s
+sys	0m0.006s
+
+Running time ./sfrobs -f <file.txt
+real	0m0.009s
+user	0m0.001s
+sys	0m0.008s
+
+
+Some observations are that the sfrob was 
+pretty consistent throughout the size of 
+input in the file. It did a pretty good 
+job and I recall my TA mention that the 
+buffer would perform better. Sfrobu was
+ much slower relative to the other files. 
+As for sfrobs, the change in performance was 
+negligible as we increased input. 
+The flag slowed down the performance 
+I noticed when we had larger inputs. 
+

@@ -1,0 +1,41 @@
+1)
+If I suppose the other teams had been observing all the bytes 
+going across the network my resulting network should still
+Be secure because as long as they dont have the keys my 
+Message is encrypted still. It's
+Because they don't have access to my private key 
+so they would have no way to decrypt the message.
+
+1.1)
+If they tapped my keyboard after completing all client
+Server setup, then it would still be secure because
+keystrokes I enter would be independent to the location of
+My private key. They know what I type but still can't actually
+Use and get the key.  As a result, my 
+Messages remain encrypted and the bytes are not in danger.
+There may be other threats but my private key isn't compromised.
+
+1.2)
+If I was booting USB and assumING the other team temporarily
+Had physical control of the USB.This scenario would certainly
+Be insecure. The reason being is since my keys exist on the
+USB, they have physical access and can go to .ssh folder
+And gain access to my private key to decrypt the messages.
+
+
+
+
+2)
+The gpg2 --verify command doesn't really verify I personally
+Created the file in question. The reason being Is that 
+The private key produces the digital signature and the
+Public key only checks the signature received. If someone were to
+Maliciously intercept the digital signature, they could
+reproduce their own signature with their own private key,
+then they could pass it along, but now we wouldn't be able to verify
+Who really created the tar file since it was "intercepted".
+
+What I would do would be to have some outside 3rd party that
+Monitors the origin of the keys. This way, there would be a type of
+Log that can keep track of the activity. I believe Blockchain technology
+Has a similar application as a reference.
